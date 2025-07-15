@@ -1,111 +1,85 @@
-import express from 'express';
-import { verifyToken } from '../middlewares/auth.js';
-import Pet from '../models/Pet.js';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+    // routes/pets.js
+    import express from 'express';
+    import multer from 'multer';
+    import path from 'path';
+    import { fileURLToPath } from 'url';
+    import { dirname } from 'path';
+    import Pet from '../models/Pet.js'; // Asegúrate de que la ruta sea correcta
+    import { verifyToken } from '../middlewares/auth.js'; // Necesitarás esto si quieres asociar la mascota al usuario logueado
 
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
 
-const router = express.Router();
+    const router = express.Router();
 
-
-// Configuración de multer para manejar la carga de imágenes
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads';
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
+    // Configuración de almacenamiento para Multer
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            // Asegúrate de que esta carpeta exista en tu servidor
+            cb(null, path.join(__dirname, '..', 'public', 'uploads'));
+        },
+        filename: (req, file, cb) => {
+            cb(null, Date.now() + '-' + file.originalname);
         }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+    });
 
-const upload = multer({ storage });
+    const fileFilter = (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos de imagen!'), false);
+        }
+    };
 
-// Obtener todas las mascotas del usuario autenticado
-router.get('/', verifyToken, async (req, res) => {
-    try {
-        const pets = await Pet.find({ owner: req.userId });
-        res.json(pets);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener las mascotas', error });
-    }
-});
-// Crear una nueva mascota
-router.post('/', verifyToken, async (req, res) => {
-    try {
-    const { name, species, age, breed } = req.body;
+    const upload = multer({ storage: storage, fileFilter: fileFilter });
 
+    // **¡ESTA ES LA RUTA QUE DEBE EXISTIR Y ESTAR CORRECTA!**
+    // router.post('/') se resuelve a POST /api/pets gracias a app.use('/api/pets', petRoutes) en index.js
+    router.post('/', upload.single('image'), verifyToken, async (req, res) => {
+        try {
+            console.log('Datos recibidos para nueva mascota:', req.body);
+            console.log('Archivo subido:', req.file);
+
+            if (!req.file) {
+                return res.status(400).json({ message: 'No se subió ningún archivo de imagen.' });
+            }
+
+            const { name, type, breed, age } = req.body;
+            const imageUrl = `/uploads/${req.file.filename}`;
+
+            // Aquí deberías guardar los datos de la mascota en tu base de datos
+            const newPet = new Pet({
+                name,
+                type,
+                breed,
+                age: parseInt(age), // Asegúrate de convertir la edad a número
+                imageUrl,
+                owner: req.userId // req.userId viene del middleware verifyToken
+            });
+
+            await newPet.save(); // Guarda la nueva mascota en la base de datos
+
+            res.status(201).json({
+                message: 'Mascota añadida exitosamente',
+                id: newPet._id, // Devuelve el ID real de la base de datos
+                name: newPet.name,
+                type: newPet.type,
+                breed: newPet.breed,
+                age: newPet.age,
+                imageUrl: newPet.imageUrl // Devuelve la URL de la imagen guardada
+            });
+
+        } catch (error) {
+            console.error('❌ ERROR al añadir mascota:', error);
+            if (error.name === 'ValidationError') {
+                return res.status(400).json({ message: error.message });
+            }
+            res.status(500).json({ message: 'Error en el servidor al añadir mascota.' });
+        }
+    });
+
+    // Puedes añadir otras rutas GET, PUT, DELETE para mascotas aquí
+    // router.get('/', (req, res) => { /* ... */ });
+
+    export default router;
     
-        const newPet = new Pet({
-            name,
-            species,
-            age,
-            breed,
-            owner: req.userId
-        });
-
-        await newPet.save();
-        res.status(201).json(newPet);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al crear la mascota', error });
-    }
-});
-
-// Actualizar una mascota
-router.put('/:id', verifyToken, upload.single('image'), async (req, res) => {
-    try {
-        const { name, species, age, breed } = req.body;
-        const updatedPet = await Pet.findByIdAndUpdate(
-            req.params.id,
-            { name, species, age, breed, image: req.file.path },
-            { new: true }
-        );
-        if (!updatedPet) return res.status(404).json({ message: 'Mascota no encontrada' });
-        res.json(updatedPet);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar la mascota', error });
-    }
-});
-
-// Eliminar una mascota
-
-router.delete('/:id', verifyToken, async (req, res) => {
-    try {
-        const deletedPet = await Pet.findByIdAndDelete(req.params.id);
-        if (!deletedPet) return res.status(404).json({ message: 'Mascota no encontrada' });
-        res.json({ message: 'Mascota eliminada con éxito' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar la mascota', error });
-    }
-});
-
-// Subir una imagen de mascota
-router.post('/upload', verifyToken, multer({ storage }).single('image'), async (req, res) => {
-    try {
-        const newPet = new Pet({
-            name: req.body.name,
-            species: req.body.species,
-            age: req.body.age,
-            breed: req.body.breed,
-            owner: req.userId,
-            image: req.file.path
-        });
-        await newPet.save();
-        res.status(201).json(newPet);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al crear la mascota', error });
-    }
-});
-
-
-
-
-
-
-
-export default router;
