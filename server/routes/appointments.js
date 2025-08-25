@@ -1,41 +1,44 @@
 import express from 'express';
 import Appointment from '../models/Appointment.js';
-import { verifyToken } from '../middlewares/auth.js';
-import multer from 'multer';
+import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Obtener todas las citas del usuario autenticado
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const appointments = await Appointment.find({ User: req.userId }).populate('pet');
+        const appointments = await Appointment.find({ owner: req.userId }).populate('pet');
         res.json(appointments);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener las citas', error });
     }
 });
 
-// Crear una nueva cita
 router.post('/', verifyToken, async (req, res) => {
     try {
-        const { pet, date, type, description } = req.body;
+
+        console.log('Datos del usuario autenticado (req.userId):', req.userId);
+        console.log('Datos de la cita recibidos:', req.body);
+
+        const { pet, date, type, title, subtitle, time } = req.body;
 
         const newAppointment = new Appointment({
-            User: req.userId,
+            owner: req.userId,
             pet,
-            date,
             type,
-            description
+            title,
+            subtitle,
+            date,
+            time
         });
 
         await newAppointment.save();
         res.status(201).json(newAppointment);
     } catch (error) {
+        console.error('Error al crear la cita:', error);
         res.status(500).json({ message: 'Error al crear la cita', error });
     }
 }); 
 
-// Actualizar una cita
 router.put('/:id', verifyToken, async (req, res) => {
     try {
         const { pet, date, type, description } = req.body;
@@ -51,7 +54,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Eliminar una cita
+
 router.delete('/:id', verifyToken, async (req, res) => {    
     try {
         const deletedAppointment = await Appointment.findByIdAndDelete(req.params.id);

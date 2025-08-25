@@ -6,7 +6,7 @@ const petSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    type: { // Ej: Dog, Cat, Bird, etc.
+    type: { 
         type: String,
         required: true,
         trim: true
@@ -21,18 +21,18 @@ const petSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
-    imageUrl: { // La URL de la imagen que Multer te dará
+    imageUrl: { 
         type: String,
         required: true
     },
-    owner: { // Para asociar la mascota a un usuario
+    owner: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Asume que tu modelo de usuario se llama 'User'
+        ref: 'User',
         required: true
     },
-    // Puedes añadir más campos aquí si lo necesitas (ej: description, medicalHistory, etc.)
+    
 }, {
-    timestamps: true // Añade createdAt y updatedAt automáticamente
+    timestamps: true 
 });
 
 const Pet = mongoose.model('Pet', petSchema);

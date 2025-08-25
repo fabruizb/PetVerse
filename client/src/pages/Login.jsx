@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import GlassButton from "../components/ui/GlassButton";
+import GlassCard from "../components/ui/GlassCard";
+import GlassInput from "../components/ui/GlassInput";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { login } = useContext(AuthContext);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,8 +35,7 @@ export default function Login() {
                 return;
             }
 
-            localStorage.setItem("token", data.token);
-
+            await login(data.token);
             navigate("/dashboard");
         } catch (err) {
             console.error("Login error:", err);
@@ -40,37 +44,32 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4 text-center">Iniciar Sesión</h2>
+        <div className="min-h-screen flex items-center justify-center  bg-[url('/background.png')] bg-cover bg-center bg-no-repeat">
+            <GlassCard className=" p-8 rounded-lg shadow-md w-full max-w-md">
+                <h2 className="text-2xl font-bold font-color-black mb-4 text-center">
+                    Iniciar Sesión
+                </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
+                    <GlassInput
                         type="email"
                         name="email"
                         placeholder="Correo electrónico"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-md"
                         required
                     />
-                    <input
+                    <GlassInput
                         type="password"
                         name="password"
                         placeholder="Contraseña"
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-md"
                         required
                     />
                     {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
-                    >
-                        Iniciar sesión
-                    </button>
+                    <GlassButton type="submit">Iniciar sesión</GlassButton>
                 </form>
-            </div>
+            </GlassCard>
         </div>
     );
 }

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useNavigate } from 'react-router-dom';
+import GlassButton from '../components/ui/GlassButton';
+import GlassCard from '../components/ui/GlassCard';
+import GlassInput from '../components/ui/GlassInput';
 
 export default function RegistrationForm() {
     const [formData, setFormData] = useState({
@@ -9,7 +12,7 @@ export default function RegistrationForm() {
         password: '',
     });
 
-    const navigate = useNavigate(); // Inicializa useNavigate
+    const navigate = useNavigate(); 
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -38,8 +41,8 @@ export default function RegistrationForm() {
             console.log('✅ ¡Cuenta creada con éxito!');
             console.log('Usuario registrado:', res.data);
 
-            // Redirige al usuario al dashboard
-            navigate('/dashboard'); // <--- ¡Aquí está el cambio clave!
+            
+            navigate('/dashboard'); 
 
         } catch (err) {
             console.error('❌ Error en el registro:', err);
@@ -53,37 +56,36 @@ export default function RegistrationForm() {
             }
 
             console.error(`Mensaje de error del servidor: ${errorMessage}`);
-            // Considera mostrar un mensaje de error en la UI aquí, en lugar de un alert
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center  bg-[url('/background.png')] bg-cover bg-center bg-no-repeat">
+            <GlassCard   className=" p-8 rounded-lg shadow-md w-full max-w-md">
                 <div className="flex justify-center mb-6">
-                    <img src="/imagenes/ChatGPT Image 13 jul 2025, 17_25_38.png" alt="PetVerse Logo" className="h-16" />
+                    <img src="/imagenes/Gemini_Generated_Image_xdgunexdgunexdgu.png" alt="PetVerse Logo" className="h-16 rounded-lg" />
                 </div>
-                <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+                <h2 className="text-3xl font-bold text-center text-white-800 mb-2">
                     Create your account
                 </h2>
-                <p className="text-center text-gray-600 mb-8">
+                <p className="text-center text-white-600 mb-8">
                     Join our community of pet lovers!
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="text" name="userName" placeholder="Your Name" value={formData.userName} onChange={handleInputChange} className="w-full px-4 py-3 rounded-md border border-gray-300" required />
-                    <input type="email" name="email" placeholder="Email address" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 rounded-md border border-gray-300" required />
-                    <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange} className="w-full px-4 py-3 rounded-md border border-gray-300" required />
+                    <GlassInput type="text" name="userName" placeholder="Your Name" value={formData.userName} onChange={handleInputChange} required />
+                    <GlassInput type="email" name="email" placeholder="Email address" value={formData.email} onChange={handleInputChange} required />
+                    <GlassInput type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange} required />
 
-                    <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md mt-6">
+                    <GlassButton type="submit" className="w-full mt-6">
                         Create Account
-                    </button>
+                    </GlassButton>
                 </form>
 
-                <p className="text-center text-gray-600 mt-6">
-                    Already have an account? <a href="/login" className="text-green-600 hover:underline">Sign in</a>
+                <p className="text-center text-white-600 mt-6">
+                    Already have an account? <a href="/login" className="text-[#084680] hover:underline">Sign in</a>
                 </p>
-            </div>
+            </GlassCard>
         </div>
     );
 }

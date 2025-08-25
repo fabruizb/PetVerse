@@ -1,22 +1,30 @@
+import React from 'react';
+import GlassCard from '../components/ui/GlassCard';
+import GlassButton from '../components/ui/GlassButton';
+
 export default function Home() {
     return (
-        <div className="min-h-screen flex flex-col items center justify-center bg-gradient-to-r from-teal-300 to-indigo-400 text-white">
-            <h1 className="text-4xl font-bold mb-6"> Bienvenido a PetVerse </h1>
-            <p className="text-lg">Adopta, cuida y entrena a tu mascota virtual</p>
-            <div className="mt-8">
-                <a
+        <div className="min-h-screen flex flex-col items center justify-center bg-[url('/background.png')] bg-cover bg-center bg-no-repeat">
+            
+            <GlassCard>
+                <h1 className="text-4xl font-bold mb-6"> Bienvenido a PetVerse </h1>
+                <p>Un lugar donde podras registrar a tu mascota y obtener todos los consejos para cuidar de tu compañero,
+                    en PetVerse, podras registrar a tus mascotas, asi como registrar y controlar su salud y bienestar.
+                    Podras, obtener recordatorios de vacunación, seguimiento de citas veterinarias y mucho más.</p>
+                <div className="mt-8 flex space-x-4 justify-center">
+                <GlassButton
                     href="/login"
-                    className="bg-white text-teal-600 px-6 py-3 rounded-full shadow-lg hover:bg-gray-100 transition duration-300"
                 >
                     Iniciar Sesión
-                </a>
-                <a
-                    href="/register"
-                    className="ml-4 bg-white text-teal-600 px-6 py-3 rounded-full shadow-lg hover:bg-gray-100 transition duration-300"
+                </GlassButton>
+                <GlassButton
+                    href="/register"               
                 >
                     Registrarse
-                </a>
+                </GlassButton>
             </div>
+            </GlassCard>        
+            
         </div>
     );
 }                  

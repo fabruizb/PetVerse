@@ -7,8 +7,8 @@ const UserSchema = new mongoose.Schema({
     userName: { type: String, required: true },
 
     pets: [{
-        petName: { type: String,  },
-        petType: { type: String,  },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Pet'
     }]
 }, { timestamps: true });
 

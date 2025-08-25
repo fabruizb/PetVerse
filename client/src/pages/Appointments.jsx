@@ -6,13 +6,15 @@ const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [pets, setPets] = useState([]);
     const [form, setForm] = useState({
-        pet: "",
-        date: "",
-        reason: ""
+        type: '',
+        title: '',
+        subtitle: '',
+        date: '',
+        time: '',
+        pet: '',
     });
     const [editingId, setEditingId] = useState(null);
 
-    // Fetch citas médicas
     const fetchAppointments = async () => {
         try {
             const res = await fetch("http://localhost:5000/api/appointments", {
@@ -27,7 +29,7 @@ const Appointments = () => {
         }
     };
 
-    // Fetch mascotas para el select
+
     const fetchPets = async () => {
         try {
             const res = await fetch("http://localhost:5000/api/pets", {
@@ -39,7 +41,7 @@ const Appointments = () => {
             setPets(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Error fetching pets:", err);
-            setPets([]); // Asegura que pets sea un array aunque haya error
+            setPets([]); 
         }
     };
 
@@ -48,7 +50,7 @@ const Appointments = () => {
         fetchPets();
     }, []);
 
-    // Crear nueva cita
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -65,13 +67,13 @@ const Appointments = () => {
 
             const newAppointment = await res.json();
             setAppointments([...appointments, newAppointment]);
-            setForm({ pet: "", date: "", reason: "" });
+            setForm({ pet: "", date: "", description: "" });
         } catch (err) {
             console.error(err);
         }
     };
 
-    // Eliminar cita
+
     const handleDelete = async (id) => {
         try {
             const res = await fetch(`http://localhost:5000/api/appointments/${id}`, {
@@ -89,7 +91,7 @@ const Appointments = () => {
         }
     };
 
-    // Editar cita
+
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
@@ -107,7 +109,7 @@ const Appointments = () => {
             const updated = await res.json();
             setAppointments(appointments.map((a) => (a._id === editingId ? updated : a)));
             setEditingId(null);
-            setForm({ pet: "", date: "", reason: "" });
+            setForm({ pet: "", date: "", description: "" });
         } catch (err) {
             console.error(err);
         }
@@ -116,9 +118,9 @@ const Appointments = () => {
     const handleEditClick = (appointment) => {
         setEditingId(appointment._id);
         setForm({
-            pet: appointment.pet._id || appointment.pet, 
+            pet: appointment.pet._id || appointment.pet,
             date: appointment.date.slice(0, 10),
-            reason: appointment.reason,
+            description: appointment.description,
         });
     };
 
@@ -134,7 +136,7 @@ const Appointments = () => {
                 >
                     {Array.isArray(pets) && pets.map((pet) => (
                         <option key={pet._id} value={pet._id}>
-                            {pet.name} ({pet.species})
+                            {pet.name} ({pet.type})
                         </option>
                     ))}
                 </select>
@@ -146,15 +148,15 @@ const Appointments = () => {
                 />
                 <input
                     type="text"
-                    placeholder="Motivo"
-                    value={form.reason}
-                    onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                    placeholder="Descripción"
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
                     required
                 />
                 <button type="submit">{editingId ? "Actualizar" : "Agregar"} Cita</button>
                 {editingId && <button onClick={() => {
                     setEditingId(null);
-                    setForm({ pet: "", date: "", reason: "" });
+                    setForm({ pet: "", date: "", description: "" });
                 }}>Cancelar</button>}
             </form>
 
